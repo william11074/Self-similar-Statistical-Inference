@@ -1,4 +1,4 @@
-# Detection and Estimation of Self-similarity
+# Statistical Inferences on Non-stationary Increments Self-similar Processes via Lamperti Transformations
 
 Including
 

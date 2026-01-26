@@ -18,15 +18,7 @@ The main idea is to use a modified version of the Lamperti transformation to tra
 
 >W. Wu, Q. Peng "Detection and Estimation of Self-similarity via Lamperti Transformations"
 
-## Detection
-Detection of self-similarity for a given sample path. 
-
-The main idea relies on a modified version of the method given in  this paper
-
->Michał Balcerek, Krzysztof Burnecki. (2020)  
-Testing of fractional Brownian motion in a noisy environment.  
-Chaos, Solitons & Fractals, Volume 140, 110097.  
-https://doi.org/10.1016/j.chaos.2020.110097
+Given the estimation of the self-similarity index, the scaling parameter may also be estimated. 
 
 ## To Install
 Use the code from the Github repository with 

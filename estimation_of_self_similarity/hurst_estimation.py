@@ -24,12 +24,7 @@ from fractal_analysis.estimator.hurst_estimator import QvHurstEstimator
 # Other imports
 from math import floor
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.optimize import minimize_scalar
-
-# for parallel processing, opens multiple cores if available
-from concurrent.futures import ProcessPoolExecutor, as_completed
-import multiprocessing
 
 # Compute A_j ^ 2 / (N - 1) for a given process X. 
 # Returns a list of length N starting from i = 0 to N - 1

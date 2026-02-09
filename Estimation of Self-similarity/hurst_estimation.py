@@ -5,7 +5,7 @@ Used for the estimation of the self-similarity index of a general H-self-similar
 This module also includes simple benchmarking helpers (serial and parallel)
 
 Notes
-- Method based on our paper "Detection and Estimation of Self-similarity via Lamperti Transformations" by W. Wu, Q. Peng 
+- Method based on our paper "Statistical Inferences on Non-stationary Self-similar Processes via Lamperti Transformations" by W. Wu, Q. Peng 
 - Simulators are imported from the `fractal_analysis` package (Ding, Peng, Wu).
 """
 
@@ -25,10 +25,7 @@ from fractal_analysis.estimator.hurst_estimator import QvHurstEstimator
 from math import floor
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import minimize
-from scipy.optimize import least_squares
-from itertools import permutations
-import pandas as pd
+from scipy.optimize import minimize_scalar
 
 # for parallel processing, opens multiple cores if available
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -48,11 +45,25 @@ def compute_b(N=1024):
     i = np.arange(0, N, dtype=float)
     return N ** (2 * (1.0 - i/N))
 
+# Functions for algorithm 2 in our paper, used for estimation of H when scaling parameter is unknown
+# s1 is some multiple of the second order moment while s2 is some multiple of the fourth order moment
+def f_H(H, a, b, N):
+    logb = np.log(b)
+    s1 = np.sum(a * np.exp(H*logb))
+    s2 = np.sum(a**2 * np.exp(2*H*logb)) * (N-1)
+    return (s1*s1/s2) ** -1
+
+def f_H2(H, a, b, N):
+    logb = np.log(b)
+    s1 = np.sum(a * np.exp(H*logb))
+    s2 = np.sum(a**2 * np.exp(2*H*logb)) * (N-1)
+    return (s1/s2) ** -1
+
 # Calculate lists a,b and use them to estimate H using Halley's method
 # sum from j = 0 to n of a_j^2 * b_j^{2H} / (n-1) = Var(X(1))
 # Note this function is designed to estimate the self-similarity index, not "H", in other words H * K is estimated for tfBm and bfBm
-def estimate_hurst(hss_path, process_type=DPW_FBM, *, H0=0.5, K=1):
-    a = compute_a(hss_path)
+def estimate_hurst_method1(hss_path, process_type=DPW_FBM, *, H0=0.5, K=1, sigma=1):
+    a = compute_a(hss_path) / (sigma**2)
     b = compute_b(len(hss_path))
     
     if process_type == DPW_SFBM:
@@ -65,56 +76,34 @@ def estimate_hurst(hss_path, process_type=DPW_FBM, *, H0=0.5, K=1):
         raise ValueError("Unsupported type for Hurst estimation")
     return H_halley
 
-# Estimate H for a single simulated path given path length, self-similarity index H, process type, K (bi factor or tri factor) and Lamperti multiplier
-def single_trial(N=1024, H=0.5, process_type=DPW_FBM, K=1, Lamperti_multiplier=5):
-    if process_type == WC_FBM:
-        hss_path = process_type(sample_size = N, hurst_parameter=H).get_fbm()
-    elif process_type == DPW_FBM:
-        hss_path = process_type(sample_size = N, hurst_parameter=H, lamperti_multiplier=Lamperti_multiplier).get_fbm()
-    elif process_type == DPW_SFBM:
-        hss_path = process_type(sample_size = N, hurst_parameter=H, lamperti_multiplier=Lamperti_multiplier).get_sub_fbm()
-    elif process_type == DPW_BFBM:
-        hss_path = process_type(sample_size = N, hurst_parameter=H, bi_factor=K, lamperti_multiplier=Lamperti_multiplier).get_bi_fbm()
-    elif process_type == DPW_TFBM:
-        hss_path = process_type(sample_size = N, hurst_parameter=H, tri_factor=K, lamperti_multiplier=Lamperti_multiplier).get_tri_fbm()
-    elif process_type == "qv":
-        hss_path = WC_FBM(sample_size = N, hurst_parameter=H).get_fbm()
-        return np.mean(QvHurstEstimator(mbm_series=hss_path, alpha=0.2).holder_exponents)
-    else:
-        raise ValueError("Unsupported type for Hurst estimation")
-    return estimate_hurst(hss_path, process_type=process_type, H0=H, K=K)
-
-# Test multiplate trials of a certan process in parallel (fast method)
-# Prints average estimated H and mean squared error
-# H_list consists of all H values to be tested
-# Progress can be chosen to be printed or not
-def hurst_tester(N=1024, *, H_list=[0.5], trials=1, process_type=DPW_FBM, speed="fast", progress=True, K=1, Lamperti_multiplier=5):
-    workers = 1
-    if speed == "fast" and trials > 1:
-        workers = 12
-        
-    max_workers = min(workers, multiprocessing.cpu_count() - 2)
-    H_estimates = []
+# Estimate H when scaling parameter is unknown
+# Computes the minimum value of the function given by f(H) as the estimated H value
+# Estimates sigma^2 by computing the quotient of the fourth order moment and second order moment
+def estimate_hurst_method2(hss_path, process_type=WC_FBM):
+    N = len(hss_path)
+    a = compute_a(hss_path)
+    b = compute_b(N)
     
-    for H in H_list:
-        H_estimates = []
-        with ProcessPoolExecutor(max_workers=max_workers) as executor:
-            futures = [executor.submit(single_trial, N, H, process_type, K, Lamperti_multiplier) for _ in range(trials)]
-            for i, future in enumerate(as_completed(futures), 1):
-                try:
-                    estimate = future.result()
-                    H_estimates.append(estimate)
-                    if progress:
-                        print(f"H={H} estimate {i}: {estimate}")
-                except Exception as e:
-                    print(f"Trial {i} failed: {e}")
-        avg = np.mean(H_estimates)
-        if len(H_estimates) == 0:
-            print(f"No successful trials for H={H}")
-            continue
-        mse = sum((H * K - H_estimates[i])**2 for i in range(len(H_estimates))) / len(H_estimates)
-        print(f"H: {H} K = {K} Average: {avg} MSE: {mse} trials: {trials} type: {process_type}")
+    def objective(H):
+        return f_H(H, a, b, N)
 
-# Testing of self-similarity estimation
+    res = minimize_scalar(
+        objective,
+        bounds=(1e-6, 1 - 1e-6),
+        method='bounded'
+    )
+
+    H_max = res.x
+    if process_type in [WC_FBM, DPW_FBM, DPW_BFBM]:
+        sigma2_estimate = f_H2(H_max, a, b, N)
+    elif process_type == DPW_SFBM:
+        sigma2_estimate = f_H2(H_max, a, b, N) / (2 - 2 ** (2 * H_max))
+    else: 
+        raise ValueError("Unsupported type for Hurst estimation")
+    return H_max, sigma2_estimate
+
+# Example testing of self-similarity parameter estimation
 if __name__ == "__main__":
-    hurst_tester(N=128, H_list=[0.2,0.5,0.7,0.8], trials=1, process_type=WC_FBM, speed="fast", progress=False, K=1, Lamperti_multiplier=5)
+    fbm_path = DPW_FBM(sample_size=1024, hurst_parameter=0.5, lamperti_multiplier=5).get_fbm()
+    print(estimate_hurst_method1(fbm_path, process_type=DPW_FBM, H0=0.5))
+    print(estimate_hurst_method2(2 * fbm_path, process_type=DPW_FBM))

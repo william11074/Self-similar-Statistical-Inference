@@ -30,17 +30,17 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 import multiprocessing
 
 # Estimate H for a single simulated path given path length, self-similarity index H, process type, K (bi factor or tri factor) and Lamperti multiplier
-def single_trial(N=1024, H=0.5, process_type=DPW_FBM, K=1, Lamperti_multiplier=5, sigma=1):
-    if process_type == WC_FBM:
-        hss_path = process_type(sample_size = N, hurst_parameter=H).get_fbm()
-    elif process_type == DPW_FBM:
-        hss_path = process_type(sample_size = N, hurst_parameter=H, lamperti_multiplier=Lamperti_multiplier).get_fbm()
-    elif process_type == DPW_SFBM:
-        hss_path = process_type(sample_size = N, hurst_parameter=H, lamperti_multiplier=Lamperti_multiplier).get_sub_fbm()
-    elif process_type == DPW_BFBM:
-        hss_path = process_type(sample_size = N, hurst_parameter=H, bi_factor=K, lamperti_multiplier=Lamperti_multiplier).get_bi_fbm()
-    elif process_type == DPW_TFBM:
-        hss_path = process_type(sample_size = N, hurst_parameter=H, tri_factor=K, lamperti_multiplier=Lamperti_multiplier).get_tri_fbm()
+def single_trial(N=1024, H=0.5, process_type="DPW_FBM", K=1, Lamperti_multiplier=5, sigma=1):
+    if process_type == "WC_FBM":
+        hss_path = WC_FBM(sample_size = N, hurst_parameter=H).get_fbm()
+    elif process_type == "DPW_FBM":
+        hss_path = DPW_FBM(sample_size = N, hurst_parameter=H, lamperti_multiplier=Lamperti_multiplier).get_fbm()
+    elif process_type == "DPW_SFBM":
+        hss_path = DPW_SFBM(sample_size = N, hurst_parameter=H, lamperti_multiplier=Lamperti_multiplier).get_sub_fbm()
+    elif process_type == "DPW_BFBM":
+        hss_path = DPW_BFBM(sample_size = N, hurst_parameter=H, bi_factor=K, lamperti_multiplier=Lamperti_multiplier).get_bi_fbm()
+    elif process_type == "DPW_TFBM":
+        hss_path = DPW_TFBM(sample_size = N, hurst_parameter=H, tri_factor=K, lamperti_multiplier=Lamperti_multiplier).get_tri_fbm()
     elif process_type == "qv":
         hss_path = WC_FBM(sample_size = N, hurst_parameter=H).get_fbm()
         return np.mean(QvHurstEstimator(mbm_series=hss_path, alpha=0.2).holder_exponents)
@@ -65,7 +65,7 @@ def remove_outliers_iqr(data, k=1.5):
 # Prints average estimated H and mean squared error
 # H_list consists of all H values to be tested
 # Progress can be chosen to be printed or not
-def hurst_tester(N=1024, *, H_list=[0.5], trials=1, process_type=DPW_FBM, speed="fast", progress=True, K=1, Lamperti_multiplier=5, sigma=1):
+def hurst_tester(N=1024, *, H_list=[0.5], trials=1, process_type="DPW_FBM", speed="fast", progress=True, K=1, Lamperti_multiplier=5, sigma=1):
     workers = 1
     if speed == "fast" and trials > 1:
         workers = 12

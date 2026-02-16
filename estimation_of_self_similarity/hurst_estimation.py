@@ -57,15 +57,15 @@ def f_H2(H, a, b, N):
 # Calculate lists a,b and use them to estimate H using Halley's method
 # sum from j = 0 to n of a_j^2 * b_j^{2H} / (n-1) = Var(X(1))
 # Note this function is designed to estimate the self-similarity index, not "H", in other words H * K is estimated for tfBm and bfBm
-def estimate_hurst_method1(hss_path, process_type=DPW_FBM, *, H0=0.5, K=1, sigma=1):
+def estimate_hurst_method1(hss_path, process_type="DPW_FBM", *, H0=0.5, K=1, sigma=1):
     a = compute_a(hss_path) / (sigma**2)
     b = compute_b(len(hss_path))
     
-    if process_type == DPW_SFBM:
+    if process_type == "DPW_SFBM":
         H_halley = solve_H_halley_sfbm(a, b, H0=H0)
-    elif process_type in [DPW_FBM, DPW_BFBM, WC_FBM]: 
+    elif process_type in ["DPW_FBM", "DPW_BFBM", "WC_FBM"]: 
         H_halley = solve_H_halley(a,b, H0=H0)
-    elif process_type == DPW_TFBM:
+    elif process_type == "DPW_TFBM":
         H_halley = solve_H_halley(np.array(a / (2 - (2 ** K))),b, H0=H0)
     else: 
         raise ValueError("Unsupported type for Hurst estimation")
@@ -74,7 +74,7 @@ def estimate_hurst_method1(hss_path, process_type=DPW_FBM, *, H0=0.5, K=1, sigma
 # Estimate H when scaling parameter is unknown
 # Computes the minimum value of the function given by f(H) as the estimated H value
 # Estimates sigma^2 by computing the quotient of the fourth order moment and second order moment
-def estimate_hurst_method2(hss_path, process_type=WC_FBM):
+def estimate_hurst_method2(hss_path, process_type="WC_FBM"):
     N = len(hss_path)
     a = compute_a(hss_path)
     b = compute_b(N)
@@ -89,9 +89,9 @@ def estimate_hurst_method2(hss_path, process_type=WC_FBM):
     )
 
     H_max = res.x
-    if process_type in [WC_FBM, DPW_FBM, DPW_BFBM]:
+    if process_type in ["WC_FBM", "DPW_FBM", "DPW_BFBM"]:
         sigma2_estimate = f_H2(H_max, a, b, N)
-    elif process_type == DPW_SFBM:
+    elif process_type == "DPW_SFBM":
         sigma2_estimate = f_H2(H_max, a, b, N) / (2 - 2 ** (2 * H_max))
     else: 
         raise ValueError("Unsupported type for Hurst estimation")

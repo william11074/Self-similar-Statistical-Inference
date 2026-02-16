@@ -5,8 +5,8 @@ Including
 - Estimation of self-similarity index via Lamperti transformations with applications for
     - Fractional Brownian motion
     - Sub-fractional Brownian motion
-    - Bi-fractioanl Brownian motion
-    - Tri-fractional Brownian motion
+    - Bifractioanl Brownian motion
+    - Trifractional Brownian motion
 - Estimation algorithm for the self-similarity index for when the scaling parameter is known and unknown
 - Additional implementation for estimating the scaling parameter
 

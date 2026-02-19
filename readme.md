@@ -15,7 +15,7 @@ Estimation of the self-similarity index of a given H-self-similar process.
 
 The main idea is to use a modified version of the Lamperti transformation to trasnform the self-similar process to a stationary process, and then exploit the properities of stationarity to estimate the value of H. Proof of convergence and error control along with the exact method can be found in our paper 
 
->W. Wu, Q. Peng "Statistical Inferences on Non-stationary Increments Self-similar Processes via Lamperti Transformations"
+>W. Wu, Q. Peng "Estimation of Self-similarity Index for Non-stationary Increments Self-similar Processes via Lamperti Transformations"
 
 Given the estimation of the self-similarity index, the scaling parameter may also be estimated. 
 
@@ -34,11 +34,17 @@ from estimation_of_self_similarity.hurst_estimation_testing.py import hurst_test
 ```
 
 ## Example Usage
-To estimate the hurst parameter on a single path taken in as a list, run 
+To estimate the hurst parameter on a single path taken in as a list where sigma is known, first normalize the data by setting sigma = 1. Then, run 
 ```
-estimate_hurst_method1(hss_path, process_type=DPW_FBM)
+estimate_hurst_method1(hss_path, process_type="DPW_FBM")
 ```
 Where hss_path is the sample path and process type dictates which self-similar process the estimation is used on. 
+
+To estimate the hurst parameter on a single path taken in as a list where sigma us unknown, run
+```
+estimate_hurst_method2(hss_path, process_type="WC_FBM"):
+```
+The outputs will be H_hat, sigma2_estimate.
 
 To run testing using simulated sample paths, run
 ```

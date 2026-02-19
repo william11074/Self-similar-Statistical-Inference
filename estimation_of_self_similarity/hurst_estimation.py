@@ -88,14 +88,14 @@ def estimate_hurst_method2(hss_path, process_type="WC_FBM"):
         method='bounded'
     )
 
-    H_max = res.x
+    H_min = res.x
     if process_type in ["WC_FBM", "DPW_FBM", "DPW_BFBM"]:
-        sigma2_estimate = f_H2(H_max, a, b, N)
+        sigma2_estimate = f_H2(H_min, a, b, N)
     elif process_type == "DPW_SFBM":
-        sigma2_estimate = f_H2(H_max, a, b, N) / (2 - 2 ** (2 * H_max))
+        sigma2_estimate = f_H2(H_min, a, b, N) / (2 - 2 ** (2 * H_min))
     else: 
         raise ValueError("Unsupported type for Hurst estimation")
-    return H_max, sigma2_estimate
+    return H_min, sigma2_estimate
 
 # Example testing of self-similarity parameter estimation
 if __name__ == "__main__":

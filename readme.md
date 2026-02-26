@@ -15,7 +15,8 @@ Estimation of the self-similarity index of a given H-self-similar process.
 
 The main idea is to use a modified version of the Lamperti transformation to trasnform the self-similar process to a stationary process, and then exploit the properities of stationarity to estimate the value of H. Proof of convergence and error control along with the exact method can be found in our paper 
 
->W. Wu, Q. Peng "Estimation of Self-similarity Index for Non-stationary Increments Self-similar Processes via Lamperti Transformations"
+>W. Wu, Q. Peng "Estimation of the Self-similarity Index of Non-stationary Increments Self-similar Processes via Lamperti Transformations"
+>[Preprint Article](https://arxiv.org/abs/2602.21764)
 
 Given the estimation of the self-similarity index, the scaling parameter may also be estimated. 
 
@@ -50,3 +51,5 @@ To run testing using simulated sample paths, run
 ```
 hurst_tester(N=1024, *, H_list=[0.5], trials=1, process_type=DPW_FBM, speed="fast", progress=True, K=1, Lamperti_multiplier=5, sigma=1)
 ```
+
+Saving results in a csv file allows for the creation of data visulization documented in the data visualization folder. 

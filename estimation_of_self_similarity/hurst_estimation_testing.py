@@ -1,8 +1,9 @@
 """
-hurst_estimation.py
+hurst_estimation_testing.py
 
 Used for the estimation of the self-similarity index of a general H-self-similar process via the Lamperti transformation
 This module also includes simple benchmarking helpers (serial and parallel)
+Used for testing out accuracy of estimationg methodologies through simulation
 
 Notes
 - Method based on our paper "Statistical Inferences on Non-stationary Self-similar Processes via Lamperti Transformations" by W. Wu, Q. Peng 

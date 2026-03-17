@@ -63,6 +63,7 @@ def solve_H_halley(a: Sequence[float], b: Sequence[float], *, H0: float = 0.5, t
 
     raise RuntimeError("Halley's method did not converge within max_iter")
 
+# Adapted version of solve_H_halley for sub-fractional Brownian motion to account for additional terms from scaling parameter
 def solve_H_halley_sfbm(a: Sequence[float], b: Sequence[float], *, H0: float = 0.5, tol: float = 1e-12, max_iter: int = 100) -> float:
     # Solve sum a_j * b_j^{2H} = 2 - 2^{2H-1} for H in [0,1] using Halley's method for sub-fractional Brownian motion.
     # Uses solve_H_halley with modified a and b lists to account for the right-hand side

@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-
+# Load the csv files into readable results
 def load_results(path: str) -> pd.DataFrame:
     df = pd.read_csv(path)
     df.columns = [c.strip() for c in df.columns]
@@ -26,6 +26,8 @@ def load_results(path: str) -> pd.DataFrame:
     df = df.dropna(subset=needed)
     return df
 
+# Use matplotlib to plot heatmap comparing N to H0 values with color representign RMSE
+# Takes in csv file with multiple simulations of estimating H
 def plot_rmse_heatmap_N_vs_H0(
     df,
     *,
@@ -131,6 +133,9 @@ def plot_rmse_heatmap_N_vs_H0(
     plt.close(fig)
     print(f"Saved: {out_png}")
 
+# Use matplotlib to plot RMSE against sample size N for different H0 values
+# Optional code for power fit to see empirical cdonvergence rate
+# Takes in csv file with multiple simulations of estimating H with different N values
 def plot_rmse_convergence(
     csv_path: str,
     *,

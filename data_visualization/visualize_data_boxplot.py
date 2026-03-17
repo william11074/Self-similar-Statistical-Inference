@@ -6,6 +6,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# The csv_path taken should have columns: process, N, H0, H_hat, K, sigma, and other information
+# The csv_path should be a list of simulated data
+
 # bi, tri-fBm
 def plot_clean_boxplot_withK(csv_path, out_png=None, name="tfBm"):
 
